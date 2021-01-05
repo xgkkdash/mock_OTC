@@ -3,3 +3,4 @@ decorator
 mongoengine
 fastapi
 pydantic
+uvicorn
