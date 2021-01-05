@@ -14,26 +14,22 @@ def test_request_buy_quote(client):
     params = {"symbol": "BTC/USD", "quantity": 0.1, "side": "buy"}
     response = client.post('/quotes/', json=params)
     assert response.status_code == 200
-    assert response.json().get('buy_px')
-
-
-def test_request_two_way_quote(client):
-    params = {"symbol": "BTC/USD", "quantity": 0.1}
-    response = client.post('/quotes/', json=params)
-    assert response.status_code == 200
-    assert response.json().get('buy_px')
-    assert response.json().get('sell_px')
+    assert response.json().get('price')
 
 
 def test_send_order(client, order):
-    params = order.__dict__
+    params = {"symbol": order.symbol, "side": order.side, "price": order.price, "quantity": order.quantity}
+    if order.order_id:
+        params['order_id'] = order.order_id
     response = client.post('/orders/', json=params)
     assert response.status_code == 200
     assert response.json().get('status') in {'filled', 'rejected'}
 
 
 def test_get_order(client, order):
-    params = order.__dict__
+    params = {"symbol": order.symbol, "side": order.side, "price": order.price, "quantity": order.quantity}
+    if order.order_id:
+        params['order_id'] = order.order_id
     send_response = client.post('/orders/', json=params)
     assert send_response.status_code == 200
     assert send_response.json().get('status') in {'filled', 'rejected'}
@@ -47,7 +43,9 @@ def test_get_order(client, order):
 
 def test_get_trade(client, order):
     # send an order and receive filled back
-    params = order.__dict__
+    params = {"symbol": order.symbol, "side": order.side, "price": order.price, "quantity": order.quantity}
+    if order.order_id:
+        params['order_id'] = order.order_id
     params['should_fill'] = True
     send_o_response = client.post('/orders/', json=params)
     assert send_o_response.status_code == 200
