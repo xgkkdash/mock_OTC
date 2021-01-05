@@ -1,8 +1,5 @@
-import pytest
-import uuid
 from database.mongodb import MongoDatabase
-from models.order import Order
-from models.trade import Trade
+from tests.conftest import *
 
 
 # this test requires mongo is already start at local pc
@@ -13,20 +10,6 @@ def db():
     database = MongoDatabase(db_name, url)
     yield database
     database.drop_database()
-
-
-def gen_id():
-    return uuid.uuid4().hex
-
-
-@pytest.fixture()
-def order():
-    return Order("BTC/USD", "buy", 3000, 0.1, gen_id())
-
-
-@pytest.fixture()
-def trade():
-    return Trade("BTC/USD", "buy", 3000, 0.1, gen_id(), gen_id())
 
 
 def test_get_invalid_order(db, order):
