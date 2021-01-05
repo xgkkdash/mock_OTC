@@ -1,3 +1,4 @@
 pytest
 decorator
 mongoengine
+fastapi
