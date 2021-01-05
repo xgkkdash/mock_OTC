@@ -1,0 +1,18 @@
+version: '2'
+services:
+    otc:
+        build: .
+        environment:
+            - DB_HOST=mongodb
+        container_name: "otc"
+        ports:
+            - 8000:8000
+        depends_on:
+            - mongodb
+        command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    mongodb:
+        image: "mongo"
+        container_name: "mongodb"
+        ports:
+            - 27017:27017
+        command: mongod
