@@ -3,7 +3,9 @@ services:
     otc:
         build: .
         environment:
+            - DB_NAME=mock_otc_prod
             - DB_HOST=mongodb
+            - DB_PORT=27017
         container_name: "otc"
         ports:
             - 8000:8000

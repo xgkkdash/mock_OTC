@@ -30,9 +30,10 @@ class SendOrder(BaseModel):
 
 # Dependency
 def get_db():
-    db_name = "test_mock_otc"
-    DB_HOST = os.environ.get('DB_HOST', 'localhost')
-    db_url = "mongodb://" + DB_HOST + ":27017/"
+    db_name = os.environ.get('DB_NAME', 'mock_otc_dev')
+    db_host = os.environ.get('DB_HOST', 'localhost')
+    db_port = os.environ.get('DB_PORT', '27017')
+    db_url = "mongodb://" + db_host + ":" + str(db_port) + "/"
     db = MongoDatabase(db_name, db_url)
     yield db
 
