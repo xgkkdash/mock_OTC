@@ -1,3 +1,4 @@
+import asyncio
 import os
 import random
 import uuid
@@ -52,10 +53,11 @@ def hello_world():
 
 
 @app.get("/orders/{order_id}")
-def get_order(order_id: str, db=Depends(get_db)):
+async def get_order(order_id: str, db=Depends(get_db)):
     order = None
     try:
-        order = db.get_order(order_id)
+        loop = asyncio.get_event_loop()
+        order = await loop.run_in_executor(None, db.get_order, order_id)
     except Exception as e:
         print(e)
     if order:
@@ -65,10 +67,11 @@ def get_order(order_id: str, db=Depends(get_db)):
 
 
 @app.get("/trades/{trade_id}")
-def get_trade(trade_id: str, db=Depends(get_db)):
+async def get_trade(trade_id: str, db=Depends(get_db)):
     trade = None
     try:
-        trade = db.get_trade(trade_id)
+        loop = asyncio.get_event_loop()
+        trade = await loop.run_in_executor(None, db.get_trade, trade_id)
     except Exception as e:
         print(e)
     if trade:
@@ -78,13 +81,13 @@ def get_trade(trade_id: str, db=Depends(get_db)):
 
 
 @app.post("/quotes/")
-def request_quote(rfq: Rfq):
+async def request_quote(rfq: Rfq):
     quote = Quote(rfq.symbol, rfq.side, gen_price(), rfq.quantity, gen_id())
     return quote.__dict__
 
 
 @app.post("/orders/")
-def send_order(send_o: SendOrder, db=Depends(get_db)):
+async def send_order(send_o: SendOrder, db=Depends(get_db)):
     order_id = send_o.order_id or gen_id()  # if client has an order_id, use it, else, gen an order_id
     order_filled = send_o.should_fill or random.randint(0, 1)
     order_status = 'filled' if order_filled else 'rejected'
@@ -93,9 +96,10 @@ def send_order(send_o: SendOrder, db=Depends(get_db)):
 
     result_order = Order(send_o.symbol, send_o.side, send_o.price, send_o.quantity,
                          order_id, order_status, filled_qty, trade_id)
-    db.save_order(result_order)
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, db.save_order, result_order)
     if order_filled:
         trade = Trade(result_order.symbol, result_order.side, result_order.price, result_order.quantity,
                       result_order.trade_id, result_order.order_id)
-        db.save_trade(trade)
+        loop.run_in_executor(None, db.save_trade, trade)
     return result_order.__dict__

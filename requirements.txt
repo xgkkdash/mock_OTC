@@ -4,3 +4,4 @@ mongoengine
 fastapi
 pydantic
 uvicorn
+asyncio
