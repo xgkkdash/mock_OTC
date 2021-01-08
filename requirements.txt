@@ -1,7 +1,7 @@
 pytest
 decorator
-mongoengine
 fastapi
 pydantic
 uvicorn
 asyncio
+motor

@@ -1,64 +1,33 @@
-import mongoengine
-from mongoengine import DoesNotExist
-from database.OrderDocument import OrderDocument
-from database.TradeDocument import TradeDocument
-from models.order import Order
-from models.trade import Trade
+import asyncio
+import motor
 
 
-class MongoDatabase:
-    def __init__(self, db_name, db_url):
-        self.db_connection = mongoengine.connect(db=db_name, host=db_url)
-        self.db_name = db_name
+async def insert_order(db, order):
+    doc = await db.orders.insert_one(dict(order.__dict__))
+    return doc
 
-    def get_order(self, order_id):
-        try:
-            doc = OrderDocument.objects.get(order_id=order_id)
-            return doc.to_order()
-        except DoesNotExist:
-            return None
 
-    def save_order(self, order: Order):
-        doc = OrderDocument.from_order(order)
-        return doc.save()
+async def find_order(db, order_id):
+    doc = await db.orders.find_one({"order_id": order_id})
+    return doc if doc else None
 
-    def delete_order(self, order_id):
-        doc = None
-        try:
-            doc = OrderDocument.objects.get(order_id=order_id)
-        except DoesNotExist:
-            pass
-        if doc:
-            doc.delete()
-            # return True after delete success
-            return True
-        else:  # target order not Found, return False
-            return False
 
-    def get_trade(self, trade_id):
-        try:
-            doc = TradeDocument.objects.get(trade_id=trade_id)
-            return doc.to_trade()
-        except DoesNotExist:
-            return None
+async def drop_orders(db):
+    result = await db.orders.drop()
+    return result
 
-    def save_trade(self, trade: Trade):
-        doc = TradeDocument.from_trade(trade)
-        return doc.save()
 
-    def delete_trade(self, trade_id):
-        doc = None
-        try:
-            doc = TradeDocument.objects.get(trade_id=trade_id)
-        except DoesNotExist:
-            pass
-        if doc:
-            doc.delete()
-            # return True after delete success
-            return True
-        else:  # target trade not Found, return False
-            return False
+async def insert_trade(db, trade):
+    doc = await db.trades.insert_one(dict(trade.__dict__))
+    return doc
 
-    # Warning: this method should be used carefully and only in the test environment
-    def drop_database(self):
-        self.db_connection.drop_database(self.db_name)
+
+async def find_trade(db, trade_id):
+    doc = await db.trades.find_one({"trade_id": trade_id})
+    return doc if doc else None
+
+
+async def drop_trades(db):
+    result = await db.trades.drop()
+    return result
+
